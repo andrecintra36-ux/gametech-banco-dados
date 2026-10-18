@@ -92,4 +92,129 @@ O objetivo é construir um banco de dados relacional capaz de organizar as opera
 O diagrama abaixo representa as entidades e os relacionamentos do sistema.
 
 ![DER da GameTech](der_gametech_completo.png)
+
+
+  
+## 3. Modelagem Lógica
+
+A modelagem lógica da GameTech Informática foi desenvolvida a partir do Diagrama Entidade-Relacionamento (DER). Foram definidas nove tabelas, seus atributos, tipos de dados, chaves primárias (PK), chaves estrangeiras (FK) e restrições de integridade.
+
+### 3.1 Cliente
+
+| Atributo | Tipo de dado | Restrição |
+|---|---|---|
+| id_cliente | INTEGER | PK |
+| nome | VARCHAR(100) | NOT NULL |
+| sobrenome | VARCHAR(100) | NOT NULL |
+| email | VARCHAR(150) | UNIQUE |
+| cpf | CHAR(11) | UNIQUE |
+| data_nascimento | DATE | |
+| rua | VARCHAR(150) | |
+| numero | VARCHAR(10) | |
+| bairro | VARCHAR(100) | |
+| cidade | VARCHAR(100) | |
+| estado | CHAR(2) | |
+| cep | CHAR(8) | |
+| data_cadastro | TIMESTAMP | |
+
+### 3.2 Cliente_Telefone
+
+| Atributo | Tipo de dado | Restrição |
+|---|---|---|
+| id_telefone | INTEGER | PK |
+| id_cliente | INTEGER | FK → Cliente(id_cliente), NOT NULL |
+| numero_telefone | VARCHAR(15) | NOT NULL |
+| tipo_telefone | VARCHAR(20) | |
+
+### 3.3 Funcionario
+
+| Atributo | Tipo de dado | Restrição |
+|---|---|---|
+| id_funcionario | INTEGER | PK |
+| nome | VARCHAR(100) | NOT NULL |
+| sobrenome | VARCHAR(100) | NOT NULL |
+| email | VARCHAR(150) | UNIQUE |
+| cargo | VARCHAR(80) | |
+| data_admissao | DATE | |
+| salario | NUMERIC(10,2) | CHECK (salario >= 0) |
+
+### 3.4 Categoria
+
+| Atributo | Tipo de dado | Restrição |
+|---|---|---|
+| id_categoria | INTEGER | PK |
+| nome | VARCHAR(100) | NOT NULL, UNIQUE |
+| descricao | TEXT | |
+
+### 3.5 Produto
+
+| Atributo | Tipo de dado | Restrição |
+|---|---|---|
+| id_produto | INTEGER | PK |
+| id_categoria | INTEGER | FK → Categoria(id_categoria), NOT NULL |
+| id_funcionario | INTEGER | FK → Funcionario(id_funcionario), NOT NULL |
+| nome | VARCHAR(150) | NOT NULL |
+| descricao | TEXT | |
+| marca | VARCHAR(100) | |
+| preco | NUMERIC(10,2) | CHECK (preco >= 0) |
+| quantidade_estoque | INTEGER | CHECK (quantidade_estoque >= 0) |
+| data_cadastro | TIMESTAMP | |
+
+### 3.6 Pedido
+
+| Atributo | Tipo de dado | Restrição |
+|---|---|---|
+| id_pedido | INTEGER | PK |
+| id_cliente | INTEGER | FK → Cliente(id_cliente), NOT NULL |
+| data_pedido | TIMESTAMP | |
+| status_pedido | VARCHAR(30) | |
+| endereco_entrega | TEXT | |
+
+### 3.7 Item_Pedido
+
+| Atributo | Tipo de dado | Restrição |
+|---|---|---|
+| id_pedido | INTEGER | PK composta, FK → Pedido(id_pedido) |
+| id_produto | INTEGER | PK composta, FK → Produto(id_produto) |
+| quantidade | INTEGER | NOT NULL, CHECK (quantidade > 0) |
+| preco_unitario | NUMERIC(10,2) | NOT NULL, CHECK (preco_unitario >= 0) |
+
+Chave primária composta: (id_pedido, id_produto).
+
+### 3.8 Pagamento
+
+| Atributo | Tipo de dado | Restrição |
+|---|---|---|
+| id_pagamento | INTEGER | PK |
+| id_pedido | INTEGER | FK → Pedido(id_pedido), NOT NULL, UNIQUE |
+| forma_pagamento | VARCHAR(30) | |
+| valor_pago | NUMERIC(10,2) | CHECK (valor_pago >= 0) |
+| status_pagamento | VARCHAR(30) | |
+| data_pagamento | TIMESTAMP | |
+
+### 3.9 Nota_Fiscal
+
+| Atributo | Tipo de dado | Restrição |
+|---|---|---|
+| id_nota_fiscal | INTEGER | PK |
+| id_pedido | INTEGER | FK → Pedido(id_pedido), NOT NULL, UNIQUE |
+| numero_nota | VARCHAR(50) | UNIQUE |
+| data_emissao | TIMESTAMP | |
+| valor_total | NUMERIC(10,2) | CHECK (valor_total >= 0) |
+
+### 3.10 Relacionamentos e regras de integridade
+
+- Cliente 1:N Pedido.
+- Cliente 1:N Cliente_Telefone.
+- Categoria 1:N Produto.
+- Funcionario 1:N Produto.
+- Pedido 1:N Item_Pedido.
+- Produto 1:N Item_Pedido.
+- Pedido N:N Produto, resolvido por Item_Pedido.
+- Pedido 1:1 Pagamento.
+- Pedido 1:1 Nota_Fiscal.
+
+A restrição UNIQUE nas tabelas Pagamento e Nota_Fiscal impede múltiplos registros associados ao mesmo pedido. A obrigatoriedade de existência desses registros e de pelo menos um item por pedido será tratada nas regras de implementação e no fluxo das operações.
+
+O total de cada pedido será calculado pela soma de quantidade × preco_unitario de seus itens. O valor_total da nota fiscal deverá corresponder a esse resultado.
   
